@@ -1,0 +1,103 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        },
+        "location": {
+            "type": "string"
+        },
+        "accountType": {
+            "type": "string"
+        },
+        "kind": {
+            "type": "string"
+        },
+        "httpsTrafficOnlyEnabled": {
+            "type": "bool"
+        },
+        "networkAclsBypass": {
+            "type": "string"
+        },
+        "networkAclsDefaultAction": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-02-01",
+            "name": "chickennetwork",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "eastus",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "dhcpOptions": {
+                    "dnsServers": []
+                },
+                "subnets": [
+                    {
+                        "id": "/subscriptions/6b629d70-676c-4072-ad40-10cb47a07605/resourceGroups/ChickenResGroup/providers/Microsoft.Network/virtualNetworks/chickennetwork/subnets/subnetk",
+                        "name": "subnetk",
+                        "properties": {
+                            "addressPrefix": "10.0.2.0/24",
+                            "networkSecurityGroup": null,
+                            "routeTable": null,
+                            "ipConfigurations": [],
+                            "applicationGatewayIPConfigurations": [],
+                            "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": []
+                                }
+                            ],
+                            "resourceNavigationLinks": []
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": []
+            }
+        },
+        {
+            "apiVersion": "2018-02-01",
+            "name": "[parameters('name')]",
+            "location": "[parameters('location')]",
+            "type": "Microsoft.Storage/storageAccounts",
+            "sku": {
+                "name": "[parameters('accountType')]"
+            },
+            "kind": "[parameters('kind')]",
+            "properties": {
+                "supportsHttpsTrafficOnly": "[parameters('httpsTrafficOnlyEnabled')]",
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "networkAcls": {
+                    "bypass": "[parameters('networkAclsBypass')]",
+                    "defaultAction": "[parameters('networkAclsDefaultAction')]",
+                    "ipRules": [],
+                    "virtualNetworkRules": [
+                        {
+                            "id": "/subscriptions/6b629d70-676c-4072-ad40-10cb47a07605/resourceGroups/ChickenResGroup/providers/Microsoft.Network/virtualNetworks/chickennetwork/subnets/subnetk"
+                        }
+                    ]
+                }
+            },
+            "dependsOn": [
+                "Microsoft.Network/virtualNetworks/chickennetwork"
+            ]
+        }
+    ]
+}
